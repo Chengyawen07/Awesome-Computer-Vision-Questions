@@ -284,3 +284,60 @@ cv2.destroyAllWindows()
 
 
 
+## 📌 5. HOG（Histogram of Oriented Gradients）
+
+HOG（方向梯度直方图）是一种 **特征提取方法**，主要用于 **目标检测、行人检测、人脸识别、车辆检测等**。
+
+#### **1️⃣ HOG 的核心思想**
+
+HOG 主要<u>基于**边缘特征**来表示图像，而不是像素值。</u>其核心思想如下：
+
+1. **计算梯度**：提取图像的边缘方向和强度。
+2. **划分 Cell**：把图像分成小块（Cell）。
+3. **统计方向直方图**：每个 Cell 内计算像素点的梯度方向直方图。
+4. **归一化 Block**：多个 Cell 组成一个 Block，进行归一化，提升鲁棒性。
+5. **构建 HOG 特征向量**：把所有 Block 连接起来，形成一个特征向量，送入分类器（如 SVM）。
+
+### **📌 HOG 关键步骤**
+
+1️⃣ **计算梯度**（Sobel 计算 x/y 方向梯度）
+ 2️⃣ **划分图像为小单元格（Cell）**
+ 3️⃣ **计算方向梯度直方图**（每个 Cell 统计梯度方向的分布）
+ 4️⃣ **对相邻 Block 归一化**（提高光照鲁棒性）
+ 5️⃣ **构建特征向量用于分类**（可用 SVM 训练分类器）
+
+### **✅ HOG 行人检测示例**
+
+```python
+import cv2
+import numpy as np
+
+# 读取图像
+img = cv2.imread("person.jpg")
+
+# 初始化 HOG 描述子
+hog = cv2.HOGDescriptor()
+hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
+
+# 进行行人检测
+rects, _ = hog.detectMultiScale(img, winStride=(8, 8), padding=(8, 8), scale=1.05)
+
+# 画出检测框
+for (x, y, w, h) in rects:
+    cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+cv2.imshow("HOG Detection", img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+```
+
+### **📌 HOG 适用场景**
+
+✅ **行人检测（Pedestrian Detection）**（自动驾驶、监控）
+ ✅ **车辆检测（Vehicle Detection）**（车牌识别）
+ ✅ **人体姿态估计（Pose Estimation）**
+ ✅ **数字字符识别（OCR）**（车牌识别、手写识别）
+
+
+
