@@ -417,3 +417,43 @@ cv2.destroyAllWindows()
 
 
 
+## **📌 2. 行人检测（Pedestrian Detection）**
+
+**作用**：检测图像/视频中的**行人**，返回行人的边界框（Bounding Box）。
+
+### **✅ 方法**
+
+1. 传统方法
+   - HOG + SVM（方向梯度直方图 + 支持向量机）
+   - Haar 特征检测
+2. 深度学习方法
+   - Faster R-CNN（区域推荐网络）
+   - YOLO（实时检测）
+   - SSD（单阶段检测）
+
+### **✅ 代码示例（HOG 行人检测）**
+
+```python
+import cv2
+
+img = cv2.imread("person.jpg")
+
+hog = cv2.HOGDescriptor()
+hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
+
+rects, _ = hog.detectMultiScale(img, winStride=(8, 8), padding=(8, 8), scale=1.05)
+
+for (x, y, w, h) in rects:
+    cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+cv2.imshow("Pedestrian Detection", img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+📌 **常用于：** 自动驾驶、视频监控（CCTV）、智能交通（ITS）
+
+------
+
+
+
