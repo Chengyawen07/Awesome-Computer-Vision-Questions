@@ -457,3 +457,74 @@ cv2.destroyAllWindows()
 
 
 
+## **📌 3. 目标检测（Object Detection）**
+
+**作用**：检测并分类多个物体，例如 **行人、车辆、动物、物品等**。
+
+### **✅ 方法**
+
+1. 单阶段检测（One-Stage）
+   - YOLO（You Only Look Once）：实时目标检测
+   - SSD（Single Shot MultiBox Detector）：快速检测
+2. 双阶段检测（Two-Stage）
+   - Faster R-CNN：精度高，但计算较慢
+3. Transformer 检测
+   - DETR（DEtection TRansformer）：基于 Transformer 的检测
+
+### **✅ 代码示例（YOLO 目标检测）**
+
+```python
+import cv2
+
+net = cv2.dnn.readNet("yolov3.weights", "yolov3.cfg")
+layer_names = net.getLayerNames()
+output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
+
+img = cv2.imread("image.jpg")
+height, width = img.shape[:2]
+
+blob = cv2.dnn.blobFromImage(img, 0.00392, (416, 416), swapRB=True, crop=False)
+net.setInput(blob)
+outs = net.forward(output_layers)
+
+for out in outs:
+    for detection in out:
+        scores = detection[5:]
+        class_id = np.argmax(scores)
+        confidence = scores[class_id]
+        if confidence > 0.5:
+            x, y, w, h = detection[:4] * np.array([width, height, width, height])
+            cv2.rectangle(img, (int(x - w/2), int(y - h/2)), (int(x + w/2), int(y + h/2)), (0, 255, 0), 2)
+
+cv2.imshow("Object Detection", img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+📌 **常用于：** 交通监控、工业检测、自动驾驶、机器人视觉
+
+------
+
+
+
+## **📌 总结：三者的主要区别**
+
+| 任务         | 目标匹配（Object Matching）      | 行人检测（Pedestrian Detection） | 目标检测（Object Detection）       |
+| ------------ | -------------------------------- | -------------------------------- | ---------------------------------- |
+| **目标**     | 识别同一个物体在两张图片中的位置 | 仅检测行人                       | 识别多种物体（行人、车辆、动物等） |
+| **是否分类** | ❌ 只匹配                         | ✅ 仅检测行人                     | ✅ 可分类多个类别                   |
+| **方法**     | SIFT、ORB、FLANN、RANSAC         | HOG+SVM, YOLO, Faster R-CNN      | YOLO, Faster R-CNN, SSD            |
+| **应用**     | 图像拼接、目标跟踪、SLAM         | 监控、自动驾驶                   | 交通检测、安防、无人机             |
+
+------
+
+
+
+## **📌 什么时候用哪种方法？**
+
+✅ **如果你要匹配同一个物体（目标匹配）** → **SIFT / ORB + RANSAC**
+ ✅ **如果你只需要检测行人（行人检测）** → **HOG + SVM / Faster R-CNN / YOLO**
+ ✅ **如果你需要检测多种物体（目标检测）** → **YOLO / Faster R-CNN**
+
+
+
