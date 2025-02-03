@@ -341,3 +341,79 @@ cv2.destroyAllWindows()
 
 
 
+## **HOG vs 其他特征**
+
+| 特征     | 适用场景           | 是否对光照鲁棒 | 是否对旋转鲁棒 | 计算量   |
+| -------- | ------------------ | -------------- | -------------- | -------- |
+| **HOG**  | 行人检测、车牌识别 | ✅ 是           | ❌ 否           | ✅ 计算快 |
+| **SIFT** | 目标匹配、SLAM     | ✅ 是           | ✅ 是           | ❌ 计算慢 |
+| **CNN**  | 深度学习检测       | ✅ 是           | ✅ 是           | ❌ 计算高 |
+
+
+
+# 📌 6. 目标匹配、行人检测、目标检测的区别
+
+这三种方法**都涉及目标识别**，但它们的任务和技术方法不同：
+
+| **任务**     | **目标匹配（Object Matching）** | **行人检测（Pedestrian Detection）** | **目标检测（Object Detection）** |
+| ------------ | ------------------------------- | ------------------------------------ | -------------------------------- |
+| **定义**     | 在两幅图像中找到相同的目标      | 识别并定位图像中的行人               | 识别并定位各种类别的物体         |
+| **输入**     | 两张图像（要匹配）              | 单张图像/视频                        | 单张图像/视频                    |
+| **输出**     | 目标的匹配点对                  | 行人边界框 (Bounding Box)            | 物体类别 + 边界框                |
+| **典型算法** | SIFT, ORB, RANSAC               | HOG+SVM, Faster R-CNN, YOLO          | Faster R-CNN, YOLO, SSD          |
+| **应用场景** | 目标跟踪、SLAM、图像拼接        | 自动驾驶、监控                       | 自动驾驶、工业检测               |
+| **是否分类** | ❌ 只匹配，不分类                | ✅ 只检测行人                         | ✅ 检测多种物体                   |
+
+------
+
+
+
+## **📌 1. 目标匹配（Object Matching）**
+
+**作用**：在两张图像中找到相同的物体或特征点。
+
+目标匹配是 **在两张图像中找到相同的特征点**，通常用在 **目标跟踪、图像拼接、SLAM**。
+
+ **目标匹配用于 SLAM 的运动估计，匹配同一物体在不同帧的位置。**
+
+### **✅ 方法**
+
+1. **基于关键点匹配**
+   - SIFT（尺度不变特征变换）
+   - ORB（快速特征）
+   - SURF（加速鲁棒特征）
+2. 基于全局匹配
+   - 直方图匹配（颜色直方图）
+   - 结构相似性（SSIM）
+3. 基于深度学习
+   - CNN 特征匹配（如 Siamese Network）
+
+### **✅ 代码示例（SIFT 目标匹配）**
+
+```python
+import cv2
+
+img1 = cv2.imread("image1.jpg", cv2.IMREAD_GRAYSCALE)
+img2 = cv2.imread("image2.jpg", cv2.IMREAD_GRAYSCALE)
+
+sift = cv2.SIFT_create()
+kp1, des1 = sift.detectAndCompute(img1, None)
+kp2, des2 = sift.detectAndCompute(img2, None)
+
+bf = cv2.BFMatcher()
+matches = bf.knnMatch(des1, des2, k=2)
+
+good_matches = [m for m, n in matches if m.distance < 0.75 * n.distance]
+
+result = cv2.drawMatchesKnn(img1, kp1, img2, kp2, [good_matches], None, flags=2)
+cv2.imshow("Matching", result)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+📌 **常用于：** 目标跟踪（Object Tracking）、图像拼接（Panorama）、SLAM（视觉里程计）
+
+------
+
+
+
