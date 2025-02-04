@@ -94,3 +94,50 @@ scheduler = CyclicLR(optimizer, base_lr=0.0001, max_lr=0.01, step_size_up=2000, 
 
 
 
+✅ **缓解过拟合的方法**
+
+| **方法**                          | **作用**                                     |
+| --------------------------------- | -------------------------------------------- |
+| **增加训练数据**                  | 让模型学到更普遍的特征                       |
+| **数据增强（Data Augmentation）** | 在图像任务中扩充数据，如旋转、镜像           |
+| **使用正则化（L1/L2）**           | 限制参数大小，防止模型过拟合                 |
+| **减少特征数**                    | 移除不相关特征，提高泛化能力                 |
+| **调整超参数**                    | 降低学习率，增加 Batch Size                  |
+| **降低模型复杂度**                | 减少神经元数，减少层数                       |
+| **使用 Dropout**                  | 随机丢弃部分神经元                           |
+| **提前停止（Early Stopping）**    | 训练时如果验证 Loss 不再下降，则提前停止训练 |
+
+🔥 **PyTorch 代码（L2 正则化 + Dropout）**
+
+```python
+import torch.nn as nn
+import torch.optim as optim
+
+# 使用 Dropout
+dropout_layer = nn.Dropout(p=0.5)
+
+# 在 PyTorch 里，我们用 `weight_decay` 来控制 L2 正则化
+optimizer = optim.SGD(model.parameters(), lr=0.01, weight_decay=0.001)
+```
+
+
+
+✅ **L2 正则化（Weight Decay）**
+
+- 在深度学习中，**L2 正则化**（也称为**权重衰减 Weight Decay**）的作用是**限制模型参数的大小**，防止过拟合。
+
+- 也就是在Loss的函数后，加上一个正则项。比如Loss = MSE + L2正则
+
+- 原理：
+
+  - **模型过拟合 = 过度依赖某些特征，导致权重变得特别大**。
+  - **L2 正则化**会**让权重变小**，防止网络学习到过于复杂的模式，增强泛化能力。
+
+- 在 PyTorch 里，我们用 `weight_decay` 来控制 L2 正则化。
+
+- 🔥 **适用于 SGD, Adam, RMSprop 等优化器**
+
+  - optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=0.01)
+
+  
+
