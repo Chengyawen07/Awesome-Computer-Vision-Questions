@@ -51,3 +51,46 @@ optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 | **小数据集**                | **SGD**      | Adam 的自适应特性在小数据集上可能没有优势        |
 | **NLP 任务（Transformer）** | **Adam**     | NLP 需要快速训练，Adam 效果更好                  |
 
+
+
+## **📌 14. 什么是周期学习率（Cyclical Learning Rate, CLR）？**
+
+✅ **学习率是超参数，影响训练效果**
+
+- 学习率太大 → 训练不稳定，难以收敛
+- 学习率太小 → 训练速度慢，容易卡住
+
+✅ **周期学习率（CLR）的作用**
+
+- <u>让学习率**在一定范围内周期性变化**，而不是固定的。</u>
+- 这样可以**跳出局部最优点，加速收敛**，提高模型泛化能力。
+
+🔥 **CLR 公式**：
+
+- Learning Rate= Min LR + (Max LR−Min LR) × f(cycle position)
+
+其中 `f(cycle position)` 可以是 **三角波、余弦波等**。
+
+🔥 **PyTorch 代码实现**
+
+```python
+from torch.optim.lr_scheduler import CyclicLR
+
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+scheduler = CyclicLR(optimizer, base_lr=0.0001, max_lr=0.01, step_size_up=2000, mode='triangular')
+```
+
+------
+
+
+
+## **📌 15. 如何判断神经网络过拟合？怎么缓解？**
+
+✅ **如何判断过拟合？**
+
+1. **训练误差下降，但测试误差变大** ✅
+2. **学习曲线**：训练 Loss **持续下降**，但验证 Loss **先下降后上升**
+3. <u>**训练数据准确率高（95%+），但测试数据准确率低**</u>
+
+
+
