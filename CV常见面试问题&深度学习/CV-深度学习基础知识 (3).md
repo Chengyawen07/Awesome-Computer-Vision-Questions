@@ -231,3 +231,149 @@ conv1x1 = nn.Conv2d(in_channels=512, out_channels=128, kernel_size=1)  # 降维
 | **增加网络深度**          | 增强非线性映射能力，提高学习能力     |
 | **组合特征**              | 让不同通道的信息交互，学习更复杂特征 |
 
+## **🚀 总结**
+
+| **问题**                      | **答案总结**                                                |
+| ----------------------------- | ----------------------------------------------------------- |
+| **13. Adam → SGD**            | Adam 收敛快但效果一般，后期用 SGD 精调模型                  |
+| **14. 周期学习率（CLR）**     | 让学习率周期性变化，加速收敛，提高泛化                      |
+| **15. 过拟合及解决方案**      | 数据增强、正则化（L2, Dropout）、减少特征数、Early Stopping |
+| **16. 全卷积神经网络（FCN）** | 端到端像素级预测，适用于图像分割                            |
+| **17. 1×1 卷积的作用**        | 调整通道数、增加非线性、组合特征                            |
+
+------
+
+
+
+## **📌 18. 梯度下降法如果陷入局部最优怎么办？**
+
+梯度下降法可能会陷入局部最优（Local Minimum），特别是在**非凸损失函数**的情况下。以下是解决方案：
+
+**✅ 1. 增大学习率（Learning Rate）**
+
+- <u>学习率（Step Size）影响模型更新的幅度：</u>
+  - **太小**：容易被卡在局部最优。
+  - **太大**：可能会错过最优点，在最优解附近震荡。
+
+🔥 **调整学习率的方法**
+
+- **指数衰减学习率（Exponential Decay）**
+- **周期性学习率（Cyclical Learning Rate, CLR）**
+
+```python
+import torch.optim.lr_scheduler as lr_scheduler
+
+scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)  # 每 10 轮学习率降低 10 倍
+```
+
+
+
+**✅ 2. 每个 Epoch 洗牌数据（Shuffling Data）**
+
+- **原因**：如果每次训练都用相同的 batch 数据，可能会陷入局部最优。
+- **解决方法**：每个 epoch 后，打乱训练数据，确保每个 batch 的样本不同。
+
+🔥 **PyTorch 实现**
+
+```python
+from torch.utils.data import DataLoader
+
+dataloader = DataLoader(dataset, batch_size=64, shuffle=True)  # 开启 shuffle
+```
+
+
+
+**✅ 3. 设置不同的参数初始化**
+
+- **原因**：不良的权重初始化可能导致模型卡在局部最优。
+
+- 解决方法
+
+  ：尝试不同的权重初始化方法，例如：
+
+  - **Xavier（Glorot）初始化**
+  - **Kaiming（He）初始化**
+
+🔥 **PyTorch 代码**
+
+```python
+import torch.nn.init as init
+
+init.xavier_uniform_(model.fc.weight)  # Xavier 初始化
+init.kaiming_uniform_(model.conv.weight, nonlinearity='relu')  # Kaiming 初始化
+```
+
+
+
+**✅ 4. 使用更好的优化算法**
+
+- **Momentum 梯度下降**：让梯度下降有“惯性”，避免停滞在局部最优。
+- **Adam（Adaptive Moment Estimation）**：自适应调整学习率，提高收敛能力。
+
+🔥 **PyTorch 代码**
+
+```python
+import torch.optim as optim
+
+optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)  # Momentum
+optimizer = optim.Adam(model.parameters(), lr=0.001)  # Adam
+```
+
+
+
+## **📌 19. 神经网络中的梯度消失（Vanishing Gradient）和梯度爆炸（Exploding Gradient）**
+
+在深度神经网络中，反向传播过程中梯度会逐层传播，如果层数**过深**，梯度可能会：
+
+- **越来越小（梯度消失）** ⏬ → 训练变慢，甚至停止更新。
+  - **在深层神经网络中，越靠近输入层，梯度就越接近 0**，导致**前面的层学不到东西**，网络几乎不更新
+
+- **越来越大（梯度爆炸）** ⏫ → 训练不稳定，模型崩溃。
+  - **在深度网络中，梯度会变得越来越大，导致参数更新过猛，网络不稳定**。
+  - 学习率太大
+
+
+
+
+**通俗理解** 梯度就像“坡度”：
+
+- 如果梯度大 → 表示“坡很陡”，参数更新幅度大，容易震荡。
+- 如果梯度小 → 表示“坡很平”，参数更新幅度小，训练慢甚至停止。
+
+
+
+**✅ 1. 为什么会发生梯度消失？**
+
+- <u>主要发生在**使用 Sigmoid 或 Tanh 激活函数**的深层网络。</u>
+- **Sigmoid 函数的梯度范围：** σ′(x)=σ(x)(1−σ(x))\sigma'(x) = \sigma(x) (1 - \sigma(x)) 由于**最大梯度值只有 0.25**，<u>当网络层数增加时，梯度会**不断变小**，导致权重更新变慢，甚至完全停止。</u>
+
+🔥 **解决方案** ✅ **使用 ReLU 替代 Sigmoid**
+
+```python
+import torch.nn.functional as F
+
+output = F.relu(input_tensor)
+```
+
+
+
+✅ **使用 Batch Normalization（BN）**
+
+```python
+import torch.nn as nn
+
+bn_layer = nn.BatchNorm1d(num_features=128)
+```
+
+
+
+✅ **使用 LSTM 代替普通 RNN**
+
+```python
+rnn = nn.LSTM(input_size=100, hidden_size=128, num_layers=2)
+```
+
+
+
+
+
