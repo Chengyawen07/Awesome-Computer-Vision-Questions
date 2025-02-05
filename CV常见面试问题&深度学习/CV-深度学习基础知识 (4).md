@@ -469,3 +469,63 @@ def compute_iou(box1, boxes):
 
 ------
 
+
+
+## **📌 31. 神经网络调参效果不好，如何优化？**
+
+当神经网络训练效果不好时，可以从以下角度思考：
+
+### **🔹 1. 是否选择了合适的损失函数？**
+
+- **回归任务**：使用 **MSE（均方误差）** 或 **MAE（平均绝对误差）**。
+- 分类任务：
+  - 二分类：`Binary Cross-Entropy`
+  - 多分类：`Cross-Entropy`
+  - 目标检测：`Focal Loss`
+
+------
+
+### **🔹 2. Batch Size 是否合适？**
+
+| **Batch Size 选择** | **影响**                              |
+| ------------------- | ------------------------------------- |
+| **太大（如 1024）** | Loss 下降平稳，但可能收敛到局部最优解 |
+| **太小（如 16）**   | Loss 震荡较大，难以收敛               |
+
+📌 **调整方法**：
+
+```python
+dataloader = torch.utils.data.DataLoader(dataset, batch_size=64, shuffle=True)
+```
+
+------
+
+### **🔹 3. 学习率（Learning Rate）是否合适？**
+
+| **学习率**          | **问题**            |
+| ------------------- | ------------------- |
+| **太大（>0.01）**   | Loss 震荡，难以收敛 |
+| **太小（<0.0001）** | 收敛速度太慢        |
+
+📌 **解决方案**：
+
+```python
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+```
+
+------
+
+### **🔹 4. 是否过拟合？**
+
+**解决方案：**
+
+- **Early Stopping（提前停止）**
+- **正则化（L1/L2）**Regularization（正则化）
+- **Dropout**
+
+```python
+dropout = nn.Dropout(p=0.5)
+```
+
+------
+
