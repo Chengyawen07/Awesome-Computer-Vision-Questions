@@ -147,18 +147,3 @@ pip install -r requirements.txt
 Feel free to contribute by adding more explanations, code examples, and real-world projects. Open a **Pull Request (PR)** to improve the repository!
 
 ------
-
-## **📜 License**
-
-This repository is licensed under the **MIT License**.
-
-------
-
-## **🌟 Stay Connected**
-
-- ⭐ Star this repo to support!
-- 📝 Follow my updates on [LinkedIn/GitHub]
-
-------
-
-This README provides a **structured overview** of the **CV Learning Repository**, making it easy to navigate and study Computer Vision fundamentals. Let me know if you need any modifications! 🚀😊
