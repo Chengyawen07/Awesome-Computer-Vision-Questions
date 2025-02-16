@@ -410,5 +410,159 @@ print("Z-score 标准化结果：\n", scaled_data)
 - **统计学习** → 用 **Z-score 标准化**
 - **文本/特征向量** → 用 **L2 归一化**
 
+## **4. 如何解决数据不平衡问题？**
+
+### **面试考察点：**
+
+- **数据不平衡的影响**
+- **如何处理数据不平衡**
+- **实际应用中的代码实现**
+
+------
+
+### **4.1 为什么数据不平衡是个问题？**
+
+数据不平衡（比如 90% 的数据是类别 A，只有 10% 是类别 B）会导致模型**偏向多数类**，即：
+
+- **精确率（Precision）较高，但召回率（Recall）较低**。
+- **分类器可能会忽略少数类，导致分类效果不佳**。
+
+------
+
+### **4.2 解决数据不平衡的常用方法
+
+在数据不平衡的情况下，常用的 Python 库主要有 **`imbalanced-learn`**、**`scikit-learn`** 和 **`numpy`**。以下是最常用的函数和库的汇总，包括 **欠采样、过采样、SMOTE、类别权重调整等方法**。
+
+| **方法**                            | **核心思路**                       | **适用场景**                                          |
+| ----------------------------------- | ---------------------------------- | ----------------------------------------------------- |
+| **欠采样（Under-Sampling）**        | 从多数类中随机删除一部分数据       | 适用于多数类数据多，数据采样不会影响模型性能的情况。  |
+| **过采样（Over-Sampling）**         | 复制少数类样本，增加数据数量       | 适用于少数类数据很少，但模型可能容易过拟合。          |
+| **SMOTE（合成少数类过采样）**       | 生成新的少数类样本，而不是简单复制 | 适用于**少数类数据较少**的情况。                      |
+| **调整类别权重（Class Weighting）** | 训练时对少数类赋予更高权重         | 适用于**模型可以设置权重**（如 SVM, Random Forest）。 |
+
+------
+
+
+
+### 4.3 代码示例
+
+#### **📌 1. 欠采样（Under-Sampling）**
+
+**目的：减少多数类样本，以平衡数据集**
+
+- **适用场景**：多数类样本很多，少数类样本足够，不希望生成虚假样本。
+
+| **方法**                | **函数**                      | **库**                    |
+| ----------------------- | ----------------------------- | ------------------------- |
+| **随机欠采样**          | `RandomUnderSampler()`        | `imblearn.under_sampling` |
+| **近邻编辑欠采样**      | `EditedNearestNeighbours()`   | `imblearn.under_sampling` |
+| **CNN（有条件近邻法）** | `CondensedNearestNeighbour()` | `imblearn.under_sampling` |
+
+```python
+from imblearn.under_sampling import RandomUnderSampler
+import numpy as np
+
+X = np.array([[i] for i in range(10)])
+y = np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1])  # 5:5 正负样本均衡
+
+rus = RandomUnderSampler(sampling_strategy=0.5)  # 让多数类样本减少到少数类的 0.5 倍
+X_resampled, y_resampled = rus.fit_resample(X, y)
+
+print("欠采样后数据分布：", np.bincount(y_resampled))
+```
+
+
+
+#### **📌 2. 过采样**
+
+- **目的：增加少数类样本，以平衡数据集**
+
+  - **适用场景**：少数类样本较少，数据量不足，避免因数据不足导致模型学习效果不佳。
+
+  | **方法**                     | **函数**              | **库**                   |
+  | ---------------------------- | --------------------- | ------------------------ |
+  | **随机过采样**               | `RandomOverSampler()` | `imblearn.over_sampling` |
+  | **SMOTE（合成少数类样本）**  | `SMOTE()`             | `imblearn.over_sampling` |
+  | **ADASYN（自适应合成采样）** | `ADASYN()`            | `imblearn.over_sampling` |
+
+```python
+from imblearn.over_sampling import RandomOverSampler
+
+ros = RandomOverSampler(sampling_strategy=1.0)  # 让两类样本数量相等
+X_resampled, y_resampled = ros.fit_resample(X, y)
+
+print("过采样后数据分布：", np.bincount(y_resampled))
+```
+
+
+
+#### 📌 3. SMOTE（Synthetic Minority Over-sampling Technique）
+
+**目的：通过合成新的样本来增加少数类样本数量**
+
+- **适用场景**：少数类样本过少，但不希望简单复制原始样本，而是希望生成相似的新样本。
+
+| **方法**       | **函数**            | **库**                   |
+| -------------- | ------------------- | ------------------------ |
+| **基本 SMOTE** | `SMOTE()`           | `imblearn.over_sampling` |
+| **边界 SMOTE** | `BorderlineSMOTE()` | `imblearn.over_sampling` |
+| **SVM SMOTE**  | `SVMSMOTE()`        | `imblearn.over_sampling` |
+
+```python
+from imblearn.over_sampling import SMOTE
+
+smote = SMOTE(sampling_strategy=1.0)  # 生成新样本，使两类数量相等
+X_resampled, y_resampled = smote.fit_resample(X, y)
+
+print("SMOTE 过采样后数据分布：", np.bincount(y_resampled))
+```
+
+
+
+#### **📌 4. 调整类别权重**
+
+```python
+from sklearn.linear_model import LogisticRegression
+from sklearn.utils.class_weight import compute_class_weight
+
+class_weights = compute_class_weight(class_weight="balanced", classes=np.unique(y), y=y)
+weights_dict = {cls: weight for cls, weight in zip(np.unique(y), class_weights)}
+
+# 使用权重进行训练
+model = LogisticRegression(class_weight=weights_dict)
+model.fit(X, y)
+```
+
+------
+
+
+
+#### 📌 **5. 评估数据不平衡问题**
+
+**目的：使用合适的评价指标衡量数据不平衡模型的表现**
+
+- **适用场景**：数据不平衡时，不适合用 Accuracy，需要用 Precision, Recall, F1-score, AUC-ROC。
+
+| **方法**                             | **函数**                  | **库**            |
+| ------------------------------------ | ------------------------- | ----------------- |
+| **计算 Precision、Recall、F1-score** | `classification_report()` | `sklearn.metrics` |
+| **计算 AUC-ROC**                     | `roc_auc_score()`         | `sklearn.metrics` |
+| **绘制 ROC 曲线**                    | `roc_curve()`             | `sklearn.metrics` |
+
+**示例代码：**
+
+```python 
+from sklearn.metrics import classification_report, roc_auc_score, roc_curve
+
+y_pred = model.predict(X)
+
+# 计算 Precision, Recall, F1-score
+print(classification_report(y, y_pred))
+
+# 计算 AUC-ROC
+auc = roc_auc_score(y, model.predict_proba(X)[:, 1])
+print("AUC-ROC:", auc)
+```
+
 
 
